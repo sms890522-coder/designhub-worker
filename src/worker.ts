@@ -4,10 +4,10 @@ import { hostname } from "node:os";
 import { mkdir } from "node:fs/promises";
 import { DesignHubClient } from "./api-client.js";
 import { cleanupDirectory, normalizeOutput, assertImageBytes } from "./image-pipeline.js";
-import { runCodexJob } from "./codex-runner.js";
+import { getCodexLoginStatus, runCodexJob } from "./codex-runner.js";
 import type { JobLease, WorkerStatus } from "./types.js";
 
-const APP_VERSION = "0.1.0";
+const APP_VERSION = "0.1.1";
 const POLL_MS = 15_000;
 const HEARTBEAT_MS = 45_000;
 
@@ -40,6 +40,7 @@ export class LocalWorker {
   async start(): Promise<void> {
     if (this.status.running) return;
     this.publish({ running: true, lastError: null });
+    this.publish({ codexStatus: await getCodexLoginStatus() });
     await this.sendHeartbeat();
     this.pollTimer = setInterval(() => void this.poll(), POLL_MS);
     this.heartbeatTimer = setInterval(() => void this.sendHeartbeat(), HEARTBEAT_MS);
@@ -66,6 +67,11 @@ export class LocalWorker {
   private async poll(): Promise<void> {
     if (!this.status.running || this.activeJob) return;
     try {
+      if (this.status.codexStatus !== "connected") {
+        const codexStatus = await getCodexLoginStatus();
+        this.publish({ codexStatus });
+        if (codexStatus !== "connected") return;
+      }
       const job = await this.client.lease();
       if (job) await this.process(job);
     } catch (error) {

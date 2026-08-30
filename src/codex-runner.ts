@@ -11,6 +11,16 @@ function codexCommand() {
   return process.env.CODEX_BIN?.trim() || (process.platform === "win32" ? "codex.exe" : "codex");
 }
 
+/** Return the local Codex CLI authentication state without exposing credentials. */
+export async function getCodexLoginStatus(): Promise<"connected" | "expired" | "error"> {
+  return new Promise((resolve) => {
+    const child = spawn(codexCommand(), ["login", "status"], { stdio: ["ignore", "ignore", "ignore"] });
+    const timeout = setTimeout(() => { child.kill(); resolve("error"); }, 10_000);
+    child.once("error", () => { clearTimeout(timeout); resolve("error"); });
+    child.once("exit", (code) => { clearTimeout(timeout); resolve(code === 0 ? "connected" : "expired"); });
+  });
+}
+
 function cleanKeywords(value: unknown): string[] | undefined {
   if (!Array.isArray(value)) return undefined;
   const keywords = value.filter((item): item is string => typeof item === "string").map((item) => item.trim()).filter(Boolean).slice(0, 8);
