@@ -1,5 +1,5 @@
 const api = window.designhubWorker;
-const baseUrl = "https://designhub-factory.imtvtube.chatgpt.site";
+const baseUrl = "https://designhub-factory.sms890522.workers.dev";
 const code = document.querySelector("#code");
 const pair = document.querySelector("#pair");
 const openSite = document.querySelector("#openSite");

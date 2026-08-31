@@ -8,7 +8,7 @@ import { pair } from "./api-client.js";
 import { LocalWorker, APP_VERSION } from "./worker.js";
 import type { WorkerPlatform, WorkerStatus } from "./types.js";
 
-const baseUrl = (process.env.DESIGNHUB_URL || "https://designhub-factory.imtvtube.chatgpt.site").replace(/\/$/u, "");
+const baseUrl = (process.env.DESIGNHUB_URL || "https://designhub-factory.sms890522.workers.dev").replace(/\/$/u, "");
 const currentDirectory = dirname(fileURLToPath(import.meta.url));
 let windowRef: BrowserWindow | null = null;
 let worker: LocalWorker | null = null;
