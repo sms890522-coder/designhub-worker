@@ -1,5 +1,7 @@
 import { spawn } from "node:child_process";
+import { existsSync } from "node:fs";
 import { mkdir, readdir, readFile } from "node:fs/promises";
+import { homedir } from "node:os";
 import { basename, join } from "node:path";
 import type { GeneratedOutput, JobLease } from "./types.js";
 
@@ -8,7 +10,21 @@ const MAX_RUNTIME_MS = 15 * 60 * 1000;
 type RunnerManifest = { title?: string; keywords?: string[]; outputs?: Array<{ file: string; title?: string; keywords?: string[] }> };
 
 function codexCommand() {
-  return process.env.CODEX_BIN?.trim() || (process.platform === "win32" ? "codex.exe" : "codex");
+  const configured = process.env.CODEX_BIN?.trim();
+  if (configured) return configured;
+  if (process.platform === "darwin") {
+    // Finder-launched Electron apps do not always inherit the shell PATH.
+    // ChatGPT for macOS ships the official Codex executable in its app bundle.
+    const candidates = [
+      "/Applications/ChatGPT.app/Contents/Resources/codex",
+      join(homedir(), "Applications/ChatGPT.app/Contents/Resources/codex"),
+      join(homedir(), ".local/bin/codex"),
+      "/opt/homebrew/bin/codex",
+      "/usr/local/bin/codex",
+    ];
+    return candidates.find((candidate) => existsSync(candidate)) || "codex";
+  }
+  return process.platform === "win32" ? "codex.exe" : "codex";
 }
 
 /** Return the local Codex CLI authentication state without exposing credentials. */
