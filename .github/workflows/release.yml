@@ -18,9 +18,40 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npm run dist
+      - name: Verify macOS signing secrets
         env:
-          CSC_IDENTITY_AUTO_DISCOVERY: "false"
+          MAC_CSC_LINK: ${{ secrets.MAC_CSC_LINK }}
+          MAC_CSC_KEY_PASSWORD: ${{ secrets.MAC_CSC_KEY_PASSWORD }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          for value in MAC_CSC_LINK MAC_CSC_KEY_PASSWORD APPLE_ID APPLE_APP_SPECIFIC_PASSWORD APPLE_TEAM_ID; do
+            if [[ -z "${!value}" ]]; then
+              echo "::error::Missing required macOS signing secret: ${value}"
+              exit 1
+            fi
+          done
+      - name: Build, sign, notarize, and staple macOS packages
+        env:
+          CSC_LINK: ${{ secrets.MAC_CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ secrets.MAC_CSC_KEY_PASSWORD }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          npm run build
+          npx electron-builder --mac --publish never \
+            -c.mac.hardenedRuntime=true \
+            -c.mac.gatekeeperAssess=false \
+            -c.mac.entitlements=build/entitlements.mac.plist \
+            -c.mac.entitlementsInherit=build/entitlements.mac.inherit.plist \
+            -c.mac.notarize=true \
+            -c.mac.forceCodeSigning=true
+          app_path="$(find release -maxdepth 3 -type d -name '*.app' | head -1)"
+          test -n "$app_path"
+          codesign --verify --deep --strict --verbose=2 "$app_path"
+          xcrun stapler validate "$app_path"
       - uses: actions/upload-artifact@v4
         with:
           name: designhub-worker-macos

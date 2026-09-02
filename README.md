@@ -18,6 +18,18 @@ DesignHub Factory의 로컬 생성 프로그램입니다. 홈페이지에서 작
 
 공개 배포 전에는 Apple Developer ID 공증과 Windows 코드 서명 인증서를 GitHub Actions에 연결해야 합니다. 현재 `gpt-image-skill` 코드는 재배포하지 않고, 공식 Codex CLI를 호출하는 독립 어댑터만 사용합니다.
 
+## macOS 서명·공증 설정
+
+macOS에서 “손상되어 열 수 없음” 또는 개발자를 확인할 수 없다는 메시지가 나오지 않게 하려면 Apple Developer의 `Developer ID Application` 인증서와 공증 인증을 사용해야 합니다. GitHub 저장소의 **Settings → Secrets and variables → Actions**에 아래 5개 Secret을 등록하세요.
+
+- `MAC_CSC_LINK`: `.p12` 인증서를 base64로 인코딩한 값
+- `MAC_CSC_KEY_PASSWORD`: `.p12` 내보내기 비밀번호
+- `APPLE_ID`: Apple Developer 계정 이메일
+- `APPLE_APP_SPECIFIC_PASSWORD`: appleid.apple.com에서 만든 앱 전용 비밀번호
+- `APPLE_TEAM_ID`: Apple Developer Team ID
+
+이 값들은 소스 코드에 저장하지 않습니다. `v*` 태그를 push하면 Actions가 서명하고, Hardened Runtime을 적용한 뒤 Apple 공증 티켓을 stapling한 `.dmg`와 `.zip`을 Release에 업로드합니다. Secret이 빠진 릴리스는 unsigned 설치 파일이 배포되지 않도록 빌드 단계에서 실패합니다.
+
 ## 설치 파일 배포
 
-`v0.1.1`처럼 `v`로 시작하는 태그를 GitHub에 push하면 Actions가 macOS(`.dmg`, `.zip`)와 Windows(`.exe`) 설치 파일을 만들고 Release에 자동으로 올립니다. 서명 인증서를 연결하기 전에는 테스트용 unsigned 패키지가 생성되므로, 실제 사용자 배포 시에는 각 플랫폼의 코드 서명·공증을 반드시 추가하세요.
+`v0.1.1`처럼 `v`로 시작하는 태그를 GitHub에 push하면 Actions가 macOS(`.dmg`, `.zip`)와 Windows(`.exe`) 설치 파일을 만들고 Release에 자동으로 올립니다. 현재 `v0.1.1`은 서명 전 테스트 릴리스이므로 macOS에서 차단될 수 있습니다. 실제 사용자 배포는 위 Secret을 등록한 뒤 새 버전 태그로 생성한 서명·공증 릴리스를 사용하세요.
