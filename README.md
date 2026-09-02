@@ -32,4 +32,4 @@ macOS에서 “손상되어 열 수 없음” 또는 개발자를 확인할 수 
 
 ## 설치 파일 배포
 
-`v0.1.1`처럼 `v`로 시작하는 태그를 GitHub에 push하면 Actions가 macOS(`.dmg`, `.zip`)와 Windows(`.exe`) 설치 파일을 만들고 Release에 자동으로 올립니다. 현재 `v0.1.1`은 서명 전 테스트 릴리스이므로 macOS에서 차단될 수 있습니다. 실제 사용자 배포는 위 Secret을 등록한 뒤 새 버전 태그로 생성한 서명·공증 릴리스를 사용하세요.
+`v0.1.3`처럼 `v`로 시작하는 태그를 GitHub에 push하면 Actions가 macOS(`.dmg`, `.zip`)와 Windows(`.exe`) 설치 파일을 만들고 Release에 자동으로 올립니다. macOS 빌드는 Developer ID 서명과 Apple 공증을 통과한 뒤 게시됩니다. 실제 사용자 배포는 서명·공증 릴리스의 설치 파일을 사용하세요.

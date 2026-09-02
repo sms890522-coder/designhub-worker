@@ -39,7 +39,9 @@ function createWindow() {
     minWidth: 560,
     minHeight: 540,
     backgroundColor: nativeTheme.shouldUseDarkColors ? "#201515" : "#f8f6f0",
-    webPreferences: { preload: join(currentDirectory, "preload.js"), contextIsolation: true, nodeIntegration: false, sandbox: true },
+    // Sandboxed Electron preload scripts are loaded as CommonJS. Keep the
+    // bridge in a .cjs file so the packaged app can expose IPC safely.
+    webPreferences: { preload: join(currentDirectory, "preload.cjs"), contextIsolation: true, nodeIntegration: false, sandbox: true },
   });
   void windowRef.loadFile(join(currentDirectory, "renderer/index.html"));
   windowRef.on("closed", () => { windowRef = null; });
