@@ -11,6 +11,12 @@ const APP_VERSION = "0.1.4";
 const POLL_MS = 15_000;
 const HEARTBEAT_MS = 45_000;
 
+function codexStatusMessage(status: WorkerStatus["codexStatus"]): string | null {
+  if (status === "error") return "공식 Codex CLI를 찾지 못했습니다. Codex CLI를 설치한 뒤 프로그램을 다시 시작해주세요.";
+  if (status === "expired") return "공식 Codex 로그인이 필요합니다. 터미널에서 codex login을 완료해주세요.";
+  return null;
+}
+
 function isRetryable(error: unknown): boolean {
   const message = error instanceof Error ? error.message : String(error);
   return /network|fetch|timeout|시간|5\d\d|ECONN|ETIMEDOUT|서버 요청 실패 \(5/iu.test(message);
@@ -40,7 +46,8 @@ export class LocalWorker {
   async start(): Promise<void> {
     if (this.status.running) return;
     this.publish({ running: true, lastError: null });
-    this.publish({ codexStatus: await getCodexLoginStatus() });
+    const codexStatus = await getCodexLoginStatus();
+    this.publish({ codexStatus, lastError: codexStatusMessage(codexStatus) });
     await this.sendHeartbeat();
     this.pollTimer = setInterval(() => void this.poll(), POLL_MS);
     this.heartbeatTimer = setInterval(() => void this.sendHeartbeat(), HEARTBEAT_MS);
@@ -69,7 +76,7 @@ export class LocalWorker {
     try {
       if (this.status.codexStatus !== "connected") {
         const codexStatus = await getCodexLoginStatus();
-        this.publish({ codexStatus });
+        this.publish({ codexStatus, lastError: codexStatusMessage(codexStatus) });
         if (codexStatus !== "connected") return;
       }
       const job = await this.client.lease();
