@@ -32,6 +32,6 @@ macOS에서 “손상되어 열 수 없음” 또는 개발자를 확인할 수 
 
 ## 설치 파일 배포
 
-`v0.1.4`처럼 `v`로 시작하는 태그를 GitHub에 push하면 Actions가 macOS(`.dmg`, `.zip`)와 Windows(`.exe`) 설치 파일을 만들고 Release에 자동으로 올립니다. macOS 빌드는 Developer ID 서명과 Apple 공증을 통과한 뒤 게시됩니다. 실제 사용자 배포는 서명·공증 릴리스의 설치 파일을 사용하세요.
+`v0.1.5`처럼 `v`로 시작하는 태그를 GitHub에 push하면 Actions가 macOS(`.dmg`, `.zip`)와 Windows(`.exe`) 설치 파일을 만들고 Release에 자동으로 올립니다. macOS 빌드는 Developer ID 서명과 Apple 공증을 통과한 뒤 게시됩니다. 실제 사용자 배포는 서명·공증 릴리스의 설치 파일을 사용하세요.
 
 프로그램 화면에서 `Codex CLI를 찾지 못했습니다`가 표시되면 공식 Codex CLI를 설치한 뒤 터미널에서 `codex login`을 완료하고 Worker를 다시 시작하세요. 릴리스 태그가 이미 존재하는 경우에도 Actions가 기존 릴리스에 새 산출물을 업로드하도록 구성되어 있습니다.

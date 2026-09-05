@@ -1,6 +1,6 @@
 {
   "name": "designhub-worker",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "private": true,
   "description": "DesignHub Factory local image generation worker",
   "type": "module",

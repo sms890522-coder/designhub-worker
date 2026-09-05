@@ -7,7 +7,7 @@ import { cleanupDirectory, normalizeOutput, assertImageBytes } from "./image-pip
 import { getCodexLoginStatus, runCodexJob } from "./codex-runner.js";
 import type { JobLease, WorkerStatus } from "./types.js";
 
-const APP_VERSION = "0.1.4";
+const APP_VERSION = "0.1.5";
 const POLL_MS = 15_000;
 const HEARTBEAT_MS = 45_000;
 
